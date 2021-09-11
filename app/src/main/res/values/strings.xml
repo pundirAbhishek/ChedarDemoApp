@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ChedarDemoApp</string>
+
+
+    <string name="ok">OK</string>
+    <string name="settings">Settings</string>
+
+    <string name="permission_rationale">The permission is needed for core functionality.</string>
+    <string name="permission_denied_explanation">Permission was denied but is needed for core functionality.</string>
+    <string name="permission_approved_explanation">You approved permission, carry (and click) on!</string>
+
+</resources>

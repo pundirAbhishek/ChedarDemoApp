@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "902460008852",
+    "project_id": "chedardemoapp",
+    "storage_bucket": "chedardemoapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902460008852:android:40ed2da9cca66c9e858781",
+        "android_client_info": {
+          "package_name": "com.example.chedardemoapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "902460008852-ufs4lr95ainmt305rjehku7c1oshuqmn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0zmGfopySPQycnXVl9FsESFI6wDW32Gc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "902460008852-ufs4lr95ainmt305rjehku7c1oshuqmn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
