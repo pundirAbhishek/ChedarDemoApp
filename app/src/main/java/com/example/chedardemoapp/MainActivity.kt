@@ -104,10 +104,13 @@ class MainActivity : AppCompatActivity(), MessageListener {
                         list.add(data)
                     }
                 }
-                list.reverse()
-                setupListView(list)
+                if (list.isEmpty()) {
+                    setupErrorView()
+                } else {
+                    list.reverse()
+                    setupListView(list)
+                }
             }
-
 
             override fun onCancelled(databaseError: DatabaseError) {
                 setupErrorView()
