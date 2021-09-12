@@ -10,11 +10,15 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +30,12 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseError
+
+import com.google.firebase.database.DataSnapshot
+
+import com.google.firebase.database.ValueEventListener
+
 
 const val PERMISSION_REQUEST_SMS_REQUEST_CODE = 100
 const val PERMISSION_FINE_LOCATION_REQUEST_CODE = 101
@@ -61,23 +71,49 @@ class MainActivity : AppCompatActivity(), MessageListener {
         )
 
         MessageReceiver.bindListener(this)
-
-//        hideIcon()
+        updateUI()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    fun setupListView(list: ArrayList<Data>) {
+        binding.recyclerView.visibility = VISIBLE
+        binding.titleContainer.visibility = VISIBLE
+        binding.errorContainer.visibility = GONE
 
-    fun hideIcon() {
-        val p = packageManager
-        val componentName = ComponentName(
-            this,
-            MainActivity::class.java
-        ) // activity which is first time open in manifiest file which is declare as <category android:name="android.intent.category.LAUNCHER" />
+        binding.recyclerView.removeAllViews()
 
-        p.setComponentEnabledSetting(
-            componentName,
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP
-        )
+        val adapter = Adapter(list)
+        binding.recyclerView.adapter = adapter
+        adapter.notifyDataSetChanged()
+    }
+
+    fun setupErrorView() {
+        binding.recyclerView.visibility = GONE
+        binding.titleContainer.visibility = GONE
+        binding.errorContainer.visibility = VISIBLE
+    }
+
+    fun updateUI() {
+        val reference: DatabaseReference = FirebaseDatabase.getInstance().reference.child("Data")
+        reference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val list = ArrayList<Data>()
+                dataSnapshot.children.forEach { snapshot ->
+                    val data: Data? = snapshot.getValue(Data::class.java)
+                    if (data != null) {
+                        list.add(data)
+                    }
+                }
+                list.reverse()
+                setupListView(list)
+            }
+
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                setupErrorView()
+                println("The read failed: " + databaseError.code)
+            }
+        })
     }
 
     override fun onStop() {

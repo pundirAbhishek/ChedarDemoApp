@@ -1,7 +1,19 @@
 package com.example.chedardemoapp
 
-data class Data(val message : MessageModel, val location : LocationModel)
+import com.google.firebase.database.IgnoreExtraProperties
 
-data class LocationModel (val latitude : Double, val longitude : Double)
+@IgnoreExtraProperties
+data class Data(val message: MessageModel? = null, val location: LocationModel? = null)
 
-data class MessageModel(val messageText : String, val contactNumber : String,)
+@IgnoreExtraProperties
+data class LocationModel(val latitude: Double? = null, val longitude: Double? = null) {
+
+    override fun toString(): String {
+        val latitude = latitude ?: 0
+        val longitude = longitude ?: 0
+        return "Latitude : $latitude\nLongitude : $longitude"
+    }
+}
+
+@IgnoreExtraProperties
+data class MessageModel(val messageText: String? = null, val contactNumber: String? = null)
